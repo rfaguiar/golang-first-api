@@ -8,15 +8,50 @@ import (
 	"net/http"
 )
 
+/*
+	Startup server API
+*/
 func main() {
 	router := mux.NewRouter()
 	router.Use(jsonMiddleware)
 	router.HandleFunc("/", home).Methods("GET")
 	router.HandleFunc("/health", healthCheck).Methods("GET")
+	router.HandleFunc("/api-v1/user", getUsers).Methods("GET")
 	//show log server address
 	log.Print("Server listen http://localhost:9000")
 	//UP server and listen http port 9000 using default http multiplexer, if error log message and kill api server
 	log.Fatal(http.ListenAndServe(":9000", router))
+}
+
+/*
+	User type for use CAD
+*/
+type User struct {
+	Id   int    `json:"id"`
+	Name string `json:"name"`
+	Age  int    `json:"age"`
+}
+
+/*
+	Show all users in a repository
+*/
+func getUsers(responseWriter http.ResponseWriter, _ *http.Request) {
+	log.Print("GET /user")
+	users := []User{
+		{Id: 1, Name: "Jorge", Age: 20},
+		{Id: 2, Name: "Jhon", Age: 33}}
+	js, err := json.Marshal(users)
+	if err != nil {
+		log.Print(err.Error())
+		responseWriter.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	_, err = responseWriter.Write(js)
+	if err != nil {
+		log.Print(err.Error())
+		responseWriter.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
 
 /*
