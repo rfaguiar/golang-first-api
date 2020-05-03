@@ -44,6 +44,7 @@ func main() {
 	router.HandleFunc("/api-v1/user/{id}", getAnUser).Methods("GET")
 	router.HandleFunc("/api-v1/user", createUser).Methods("POST")
 	router.HandleFunc("/api-v1/user/{id}", deleteUser).Methods("DELETE")
+	router.HandleFunc("/api-v1/user/{id}", updateUser).Methods("PUT")
 	//show log server address
 	log.Print("Server listen http://localhost:9000")
 	//UP server and listen http port 9000 using default http multiplexer, if error log message and kill api server
@@ -67,6 +68,41 @@ func jsonMiddleware(handler http.Handler) http.Handler {
 		responseWriter.Header().Set("Content-Type", "application/json")
 		handler.ServeHTTP(responseWriter, request)
 	})
+}
+
+/*
+	Update user using parameter id and attributes inside body
+*/
+func updateUser(responseWriter http.ResponseWriter, request *http.Request) {
+	params := mux.Vars(request)
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		log.Print(err.Error())
+		responseWriter.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	log.Printf("PUT /api-v1/user/%v", id)
+	//find user by id
+	index := -1
+	for key, u := range userRepo {
+		if u.Id == id {
+			index = key
+		}
+	}
+	if index < 0 {
+		responseWriter.WriteHeader(http.StatusNotFound)
+		return
+	}
+	//update user in a repository
+	var user User
+	err = json.NewDecoder(request.Body).Decode(&user)
+	if err != nil {
+		log.Print(err.Error())
+		responseWriter.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	user.Id = id
+	userRepo[index] = user
 }
 
 /*
@@ -96,7 +132,6 @@ func deleteUser(responseWriter http.ResponseWriter, request *http.Request) {
 	leftSlice := userRepo[0:index]
 	rightSlice := userRepo[index+1:]
 	userRepo = append(leftSlice, rightSlice...)
-
 }
 
 /*
