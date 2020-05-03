@@ -42,6 +42,7 @@ func main() {
 	router.HandleFunc("/health", healthCheck).Methods("GET")
 	router.HandleFunc("/api-v1/user", getUsers).Methods("GET")
 	router.HandleFunc("/api-v1/user/{id}", getAnUser).Methods("GET")
+	router.HandleFunc("/api-v1/user", createUser).Methods("POST")
 	//show log server address
 	log.Print("Server listen http://localhost:9000")
 	//UP server and listen http port 9000 using default http multiplexer, if error log message and kill api server
@@ -65,6 +66,24 @@ func jsonMiddleware(handler http.Handler) http.Handler {
 		responseWriter.Header().Set("Content-Type", "application/json")
 		handler.ServeHTTP(responseWriter, request)
 	})
+}
+
+/*
+	Create new user and save in a repository and set location
+*/
+func createUser(responseWriter http.ResponseWriter, request *http.Request) {
+	log.Print("POST /api-v1/user")
+	var user User
+	err := json.NewDecoder(request.Body).Decode(&user)
+	if err != nil {
+		log.Print(err.Error())
+		responseWriter.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	user.Id = len(userRepo) + 1
+	userRepo = append(userRepo, user)
+	responseWriter.Header().Set("location", fmt.Sprintf("/api-v1/user/%v", user.Id))
+	responseWriter.WriteHeader(http.StatusCreated)
 }
 
 /*
