@@ -4,18 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/rfaguiar/golang-first-api/api/model"
 	"log"
 	"net/http"
 	"strconv"
 )
-
-/*
-	Type Health for use health checks endpoint
-	Ex: status: "UP"
-*/
-type Health struct {
-	Status string `json:"status"`
-}
 
 /*
 	User type for use CAD
@@ -198,7 +191,7 @@ func getUsers(responseWriter http.ResponseWriter, _ *http.Request) {
 */
 func healthCheck(responseWriter http.ResponseWriter, _ *http.Request) {
 	log.Print("GET /health")
-	health := Health{"UP"}
+	health := model.Health{Status: "UP"}
 	err := json.NewEncoder(responseWriter).Encode(health)
 	if err != nil {
 		log.Print(err.Error())
