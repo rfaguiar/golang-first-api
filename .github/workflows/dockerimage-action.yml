@@ -1,3 +1,11 @@
+name: Docker-build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
 uses: mr-smithers-excellent/docker-build-push@v3
 with:
   image: rfaguiar/golang-first-api:$(date +%s)
