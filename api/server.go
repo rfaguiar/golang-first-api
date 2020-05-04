@@ -117,8 +117,7 @@ func createUser(responseWriter http.ResponseWriter, request *http.Request) {
 		responseWriter.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	user.Id = len(model.UserRepo) + 1
-	model.UserRepo = append(model.UserRepo, user)
+	user.Save()
 	responseWriter.Header().Set("location", fmt.Sprintf("/api-v1/user/%v", user.Id))
 	responseWriter.WriteHeader(http.StatusCreated)
 }

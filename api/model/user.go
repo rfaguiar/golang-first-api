@@ -41,3 +41,11 @@ func (_ User) FindById(id int) *User {
 	}
 	return nil
 }
+
+/*
+	save new user in a repository
+*/
+func (user *User) Save() {
+	user.Id = len(UserRepo) + 1
+	UserRepo = append(UserRepo, *user)
+}
