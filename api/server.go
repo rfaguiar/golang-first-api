@@ -15,7 +15,7 @@ import (
 */
 
 func Run() {
-	initializeDatabase()
+	model.User{}.InitializeDatabase()
 	router := mux.NewRouter()
 	router.Use(jsonMiddleware)
 	router.HandleFunc("/", home).Methods("GET")
@@ -30,15 +30,6 @@ func Run() {
 	//UP server and listen http port 9000 using default http multiplexer, if error log message and kill api server
 	log.Fatal(http.ListenAndServe(":9000", router))
 
-}
-
-/*
-	Initialize in memory database
-*/
-func initializeDatabase() {
-	model.UserRepo = append(model.UserRepo,
-		model.User{Id: 1, Name: "Jorge", Age: 20},
-		model.User{Id: 2, Name: "Jhon", Age: 33})
 }
 
 /*

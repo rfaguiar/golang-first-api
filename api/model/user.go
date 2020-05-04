@@ -13,3 +13,12 @@ type User struct {
 	Repository for users type
 */
 var UserRepo []User
+
+/*
+	Initialize in memory database
+*/
+func (_ User) InitializeDatabase() {
+	UserRepo = append(UserRepo,
+		User{Id: 1, Name: "Jorge", Age: 20},
+		User{Id: 2, Name: "Jhon", Age: 33})
+}
