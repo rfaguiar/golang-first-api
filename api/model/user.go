@@ -63,3 +63,17 @@ func (user User) Remove() {
 		}
 	}
 }
+
+func (user *User) Update(id int) {
+	index := -1
+	for key, u := range UserRepo {
+		if u.Id == id {
+			index = key
+			break
+		}
+	}
+	u := &UserRepo[index]
+	u.Id = id
+	u.Name = user.Name
+	u.Age = user.Age
+}

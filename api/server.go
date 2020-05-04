@@ -54,26 +54,19 @@ func updateUser(responseWriter http.ResponseWriter, request *http.Request) {
 	}
 	log.Printf("PUT /api-v1/user/%v", id)
 	//find user by id
-	index := -1
-	for key, u := range model.UserRepo {
-		if u.Id == id {
-			index = key
-		}
-	}
-	if index < 0 {
+	user := model.User{}.FindById(id)
+	if user == nil {
 		responseWriter.WriteHeader(http.StatusNotFound)
 		return
 	}
-	//update user in a repository
-	var user model.User
-	err = json.NewDecoder(request.Body).Decode(&user)
+	var userToSave model.User
+	err = json.NewDecoder(request.Body).Decode(&userToSave)
 	if err != nil {
 		log.Print(err.Error())
 		responseWriter.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	user.Id = id
-	model.UserRepo[index] = user
+	userToSave.Update(user.Id)
 }
 
 /*
