@@ -29,3 +29,12 @@ func (_ User) InitializeDatabase() {
 func (_ User) FindAll() []User {
 	return UserRepo
 }
+
+func (_ User) FindById(id int) *User {
+	for _, user := range UserRepo {
+		if user.Id == id {
+			return &user
+		}
+	}
+	return nil
+}

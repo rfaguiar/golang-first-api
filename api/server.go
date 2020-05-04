@@ -135,17 +135,16 @@ func getAnUser(responseWriter http.ResponseWriter, request *http.Request) {
 		return
 	}
 	log.Printf("GET /api-v1/user/%v", id)
-	for _, user := range model.UserRepo {
-		if user.Id == id {
-			err = json.NewEncoder(responseWriter).Encode(user)
-			if err != nil {
-				log.Print(err.Error())
-				responseWriter.WriteHeader(http.StatusInternalServerError)
-			}
-			return
-		}
+	user := model.User{}.FindById(id)
+	if user == nil {
+		responseWriter.WriteHeader(http.StatusNotFound)
+		return
 	}
-	responseWriter.WriteHeader(http.StatusNotFound)
+	err = json.NewEncoder(responseWriter).Encode(user)
+	if err != nil {
+		log.Print(err.Error())
+		responseWriter.WriteHeader(http.StatusInternalServerError)
+	}
 }
 
 /*
