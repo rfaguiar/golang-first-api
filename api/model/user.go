@@ -49,3 +49,17 @@ func (user *User) Save() {
 	user.Id = len(UserRepo) + 1
 	UserRepo = append(UserRepo, *user)
 }
+
+/*
+	delete user in a repository
+*/
+func (user User) Remove() {
+	for key, u := range UserRepo {
+		if u.Id == user.Id {
+			leftSlice := UserRepo[0:key]
+			rightSlice := UserRepo[key+1:]
+			UserRepo = append(leftSlice, rightSlice...)
+			break
+		}
+	}
+}

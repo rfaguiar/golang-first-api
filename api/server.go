@@ -88,21 +88,12 @@ func deleteUser(responseWriter http.ResponseWriter, request *http.Request) {
 		return
 	}
 	log.Printf("DELETE /api-v1/user/%v", id)
-	//find user by id
-	index := -1
-	for key, u := range model.UserRepo {
-		if u.Id == id {
-			index = key
-		}
-	}
-	if index < 0 {
+	user := model.User{}.FindById(id)
+	if user == nil {
 		responseWriter.WriteHeader(http.StatusNotFound)
 		return
 	}
-	//delete user in a repository
-	leftSlice := model.UserRepo[0:index]
-	rightSlice := model.UserRepo[index+1:]
-	model.UserRepo = append(leftSlice, rightSlice...)
+	user.Remove()
 }
 
 /*
