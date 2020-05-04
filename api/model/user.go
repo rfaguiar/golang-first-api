@@ -30,6 +30,9 @@ func (_ User) FindAll() []User {
 	return UserRepo
 }
 
+/*
+	find user by id
+*/
 func (_ User) FindById(id int) *User {
 	for _, user := range UserRepo {
 		if user.Id == id {
