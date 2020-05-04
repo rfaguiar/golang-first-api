@@ -13,7 +13,6 @@ import (
 /*
 	Startup server API
 */
-
 func Run() {
 	model.User{}.InitializeDatabase()
 	router := mux.NewRouter()
@@ -154,7 +153,8 @@ func getAnUser(responseWriter http.ResponseWriter, request *http.Request) {
 */
 func getUsers(responseWriter http.ResponseWriter, _ *http.Request) {
 	log.Print("GET /api-v1/user")
-	err := json.NewEncoder(responseWriter).Encode(model.UserRepo)
+	users := model.User{}.FindAll()
+	err := json.NewEncoder(responseWriter).Encode(users)
 	if err != nil {
 		log.Print(err.Error())
 		responseWriter.WriteHeader(http.StatusInternalServerError)

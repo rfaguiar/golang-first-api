@@ -22,3 +22,10 @@ func (_ User) InitializeDatabase() {
 		User{Id: 1, Name: "Jorge", Age: 20},
 		User{Id: 2, Name: "Jhon", Age: 33})
 }
+
+/*
+	find all users in a repository
+*/
+func (_ User) FindAll() []User {
+	return UserRepo
+}
