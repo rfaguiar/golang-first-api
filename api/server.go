@@ -11,20 +11,6 @@ import (
 )
 
 /*
-	User type for use CAD
-*/
-type User struct {
-	Id   int    `json:"id"`
-	Name string `json:"name"`
-	Age  int    `json:"age"`
-}
-
-/*
-	Repository for users type
-*/
-var userRepo []User
-
-/*
 	Startup server API
 */
 
@@ -50,9 +36,9 @@ func Run() {
 	Initialize in memory database
 */
 func initializeDatabase() {
-	userRepo = append(userRepo,
-		User{Id: 1, Name: "Jorge", Age: 20},
-		User{Id: 2, Name: "Jhon", Age: 33})
+	model.UserRepo = append(model.UserRepo,
+		model.User{Id: 1, Name: "Jorge", Age: 20},
+		model.User{Id: 2, Name: "Jhon", Age: 33})
 }
 
 /*
@@ -79,7 +65,7 @@ func updateUser(responseWriter http.ResponseWriter, request *http.Request) {
 	log.Printf("PUT /api-v1/user/%v", id)
 	//find user by id
 	index := -1
-	for key, u := range userRepo {
+	for key, u := range model.UserRepo {
 		if u.Id == id {
 			index = key
 		}
@@ -89,7 +75,7 @@ func updateUser(responseWriter http.ResponseWriter, request *http.Request) {
 		return
 	}
 	//update user in a repository
-	var user User
+	var user model.User
 	err = json.NewDecoder(request.Body).Decode(&user)
 	if err != nil {
 		log.Print(err.Error())
@@ -97,7 +83,7 @@ func updateUser(responseWriter http.ResponseWriter, request *http.Request) {
 		return
 	}
 	user.Id = id
-	userRepo[index] = user
+	model.UserRepo[index] = user
 }
 
 /*
@@ -114,7 +100,7 @@ func deleteUser(responseWriter http.ResponseWriter, request *http.Request) {
 	log.Printf("DELETE /api-v1/user/%v", id)
 	//find user by id
 	index := -1
-	for key, u := range userRepo {
+	for key, u := range model.UserRepo {
 		if u.Id == id {
 			index = key
 		}
@@ -124,9 +110,9 @@ func deleteUser(responseWriter http.ResponseWriter, request *http.Request) {
 		return
 	}
 	//delete user in a repository
-	leftSlice := userRepo[0:index]
-	rightSlice := userRepo[index+1:]
-	userRepo = append(leftSlice, rightSlice...)
+	leftSlice := model.UserRepo[0:index]
+	rightSlice := model.UserRepo[index+1:]
+	model.UserRepo = append(leftSlice, rightSlice...)
 }
 
 /*
@@ -134,15 +120,15 @@ func deleteUser(responseWriter http.ResponseWriter, request *http.Request) {
 */
 func createUser(responseWriter http.ResponseWriter, request *http.Request) {
 	log.Print("POST /api-v1/user")
-	var user User
+	var user model.User
 	err := json.NewDecoder(request.Body).Decode(&user)
 	if err != nil {
 		log.Print(err.Error())
 		responseWriter.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	user.Id = len(userRepo) + 1
-	userRepo = append(userRepo, user)
+	user.Id = len(model.UserRepo) + 1
+	model.UserRepo = append(model.UserRepo, user)
 	responseWriter.Header().Set("location", fmt.Sprintf("/api-v1/user/%v", user.Id))
 	responseWriter.WriteHeader(http.StatusCreated)
 }
@@ -159,7 +145,7 @@ func getAnUser(responseWriter http.ResponseWriter, request *http.Request) {
 		return
 	}
 	log.Printf("GET /api-v1/user/%v", id)
-	for _, user := range userRepo {
+	for _, user := range model.UserRepo {
 		if user.Id == id {
 			err = json.NewEncoder(responseWriter).Encode(user)
 			if err != nil {
@@ -177,7 +163,7 @@ func getAnUser(responseWriter http.ResponseWriter, request *http.Request) {
 */
 func getUsers(responseWriter http.ResponseWriter, _ *http.Request) {
 	log.Print("GET /api-v1/user")
-	err := json.NewEncoder(responseWriter).Encode(userRepo)
+	err := json.NewEncoder(responseWriter).Encode(model.UserRepo)
 	if err != nil {
 		log.Print(err.Error())
 		responseWriter.WriteHeader(http.StatusInternalServerError)
