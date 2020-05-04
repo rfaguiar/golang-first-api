@@ -41,7 +41,7 @@ jobs:
       uses: mr-smithers-excellent/docker-build-push@v3
       with:
         image: rfaguiar/golang-first-api
-        tag: ${{ GITHUB_RUN_ID }}
+        tag: ${{ env.GITHUB_RUN_ID }}
         registry: docker.io
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
