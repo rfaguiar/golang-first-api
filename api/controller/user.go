@@ -84,3 +84,31 @@ func DeleteUser(responseWriter http.ResponseWriter, request *http.Request) {
 	}
 	user.Remove()
 }
+
+/*
+	Update user using parameter id and attributes inside body
+*/
+func UpdateUser(responseWriter http.ResponseWriter, request *http.Request) {
+	params := mux.Vars(request)
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		log.Print(err.Error())
+		responseWriter.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	log.Printf("PUT /api-v1/user/%v", id)
+	//find user by id
+	user := model.User{}.FindById(id)
+	if user == nil {
+		responseWriter.WriteHeader(http.StatusNotFound)
+		return
+	}
+	var userToSave model.User
+	err = json.NewDecoder(request.Body).Decode(&userToSave)
+	if err != nil {
+		log.Print(err.Error())
+		responseWriter.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	userToSave.Update(user.Id)
+}
