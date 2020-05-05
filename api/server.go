@@ -19,7 +19,7 @@ func Run() {
 	router := mux.NewRouter()
 	router.Use(jsonMiddleware)
 	router.HandleFunc("/", controller.Home).Methods("GET")
-	router.HandleFunc("/health", healthCheck).Methods("GET")
+	router.HandleFunc("/health", controller.HealthCheck).Methods("GET")
 	router.HandleFunc("/api-v1/user", getUsers).Methods("GET")
 	router.HandleFunc("/api-v1/user/{id}", getAnUser).Methods("GET")
 	router.HandleFunc("/api-v1/user", createUser).Methods("POST")
@@ -138,21 +138,6 @@ func getUsers(responseWriter http.ResponseWriter, _ *http.Request) {
 	log.Print("GET /api-v1/user")
 	users := model.User{}.FindAll()
 	err := json.NewEncoder(responseWriter).Encode(users)
-	if err != nil {
-		log.Print(err.Error())
-		responseWriter.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-}
-
-/*
-	show health check status UP and set status code 200 OK
-	if error print log and set status 500 Internal Server Error
-*/
-func healthCheck(responseWriter http.ResponseWriter, _ *http.Request) {
-	log.Print("GET /health")
-	health := model.Health{Status: "UP"}
-	err := json.NewEncoder(responseWriter).Encode(health)
 	if err != nil {
 		log.Print(err.Error())
 		responseWriter.WriteHeader(http.StatusInternalServerError)

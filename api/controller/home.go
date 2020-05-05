@@ -11,7 +11,7 @@ import (
 */
 func Home(responseWriter http.ResponseWriter, _ *http.Request) {
 	responseWriter.Header().Set("Content-Type", "text/plain")
-	log.Print("GET / home")
+	log.Print("home controller GET /")
 	_, err := fmt.Fprint(responseWriter, "Server UP")
 	if err != nil { // if error then log error and return status code 500 Internal Server Error
 		log.Print(err.Error())
