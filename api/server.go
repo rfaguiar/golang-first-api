@@ -20,7 +20,7 @@ func Run() {
 	router.Use(jsonMiddleware)
 	router.HandleFunc("/", controller.Home).Methods("GET")
 	router.HandleFunc("/health", controller.HealthCheck).Methods("GET")
-	router.HandleFunc("/api-v1/user", getUsers).Methods("GET")
+	router.HandleFunc("/api-v1/user", controller.GetUsers).Methods("GET")
 	router.HandleFunc("/api-v1/user/{id}", getAnUser).Methods("GET")
 	router.HandleFunc("/api-v1/user", createUser).Methods("POST")
 	router.HandleFunc("/api-v1/user/{id}", deleteUser).Methods("DELETE")
@@ -29,7 +29,6 @@ func Run() {
 	log.Print("Server listen http://localhost:9000")
 	//UP server and listen http port 9000 using default http multiplexer, if error log message and kill api server
 	log.Fatal(http.ListenAndServe(":9000", router))
-
 }
 
 /*
@@ -128,19 +127,5 @@ func getAnUser(responseWriter http.ResponseWriter, request *http.Request) {
 	if err != nil {
 		log.Print(err.Error())
 		responseWriter.WriteHeader(http.StatusInternalServerError)
-	}
-}
-
-/*
-	Show all users in a repository
-*/
-func getUsers(responseWriter http.ResponseWriter, _ *http.Request) {
-	log.Print("GET /api-v1/user")
-	users := model.User{}.FindAll()
-	err := json.NewEncoder(responseWriter).Encode(users)
-	if err != nil {
-		log.Print(err.Error())
-		responseWriter.WriteHeader(http.StatusInternalServerError)
-		return
 	}
 }

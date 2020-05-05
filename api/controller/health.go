@@ -12,7 +12,7 @@ import (
 	if error print log and set status 500 Internal Server Error
 */
 func HealthCheck(responseWriter http.ResponseWriter, _ *http.Request) {
-	log.Print("Health controller GET /health")
+	log.Print("Health controller: GET /health")
 	health := model.Health{Status: "UP"}
 	err := json.NewEncoder(responseWriter).Encode(health)
 	if err != nil {
