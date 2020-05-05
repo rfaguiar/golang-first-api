@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/rfaguiar/golang-first-api/api/controller"
 	"github.com/rfaguiar/golang-first-api/api/model"
@@ -22,7 +21,7 @@ func Run() {
 	router.HandleFunc("/health", controller.HealthCheck).Methods("GET")
 	router.HandleFunc("/api-v1/user", controller.GetUsers).Methods("GET")
 	router.HandleFunc("/api-v1/user/{id}", controller.GetAnUser).Methods("GET")
-	router.HandleFunc("/api-v1/user", createUser).Methods("POST")
+	router.HandleFunc("/api-v1/user", controller.CreateUser).Methods("POST")
 	router.HandleFunc("/api-v1/user/{id}", deleteUser).Methods("DELETE")
 	router.HandleFunc("/api-v1/user/{id}", updateUser).Methods("PUT")
 	//show log server address
@@ -87,21 +86,4 @@ func deleteUser(responseWriter http.ResponseWriter, request *http.Request) {
 		return
 	}
 	user.Remove()
-}
-
-/*
-	Create new user and save in a repository and set location
-*/
-func createUser(responseWriter http.ResponseWriter, request *http.Request) {
-	log.Print("POST /api-v1/user")
-	var user model.User
-	err := json.NewDecoder(request.Body).Decode(&user)
-	if err != nil {
-		log.Print(err.Error())
-		responseWriter.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	user.Save()
-	responseWriter.Header().Set("location", fmt.Sprintf("/api-v1/user/%v", user.Id))
-	responseWriter.WriteHeader(http.StatusCreated)
 }

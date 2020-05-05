@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/rfaguiar/golang-first-api/api/model"
 	"log"
@@ -34,7 +35,7 @@ func GetAnUser(responseWriter http.ResponseWriter, request *http.Request) {
 		responseWriter.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	log.Printf("GET /api-v1/user/%v", id)
+	log.Printf("User controller: GET /api-v1/user/%v", id)
 	user := model.User{}.FindById(id)
 	if user == nil {
 		responseWriter.WriteHeader(http.StatusNotFound)
@@ -45,4 +46,21 @@ func GetAnUser(responseWriter http.ResponseWriter, request *http.Request) {
 		log.Print(err.Error())
 		responseWriter.WriteHeader(http.StatusInternalServerError)
 	}
+}
+
+/*
+	Create new user and save in a repository and set location
+*/
+func CreateUser(responseWriter http.ResponseWriter, request *http.Request) {
+	log.Print("User controller: POST /api-v1/user")
+	var user model.User
+	err := json.NewDecoder(request.Body).Decode(&user)
+	if err != nil {
+		log.Print(err.Error())
+		responseWriter.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	user.Save()
+	responseWriter.Header().Set("location", fmt.Sprintf("/api-v1/user/%v", user.Id))
+	responseWriter.WriteHeader(http.StatusCreated)
 }
