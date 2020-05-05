@@ -22,7 +22,7 @@ func Run() {
 	router.HandleFunc("/api-v1/user", controller.GetUsers).Methods("GET")
 	router.HandleFunc("/api-v1/user/{id}", controller.GetAnUser).Methods("GET")
 	router.HandleFunc("/api-v1/user", controller.CreateUser).Methods("POST")
-	router.HandleFunc("/api-v1/user/{id}", deleteUser).Methods("DELETE")
+	router.HandleFunc("/api-v1/user/{id}", controller.DeleteUser).Methods("DELETE")
 	router.HandleFunc("/api-v1/user/{id}", updateUser).Methods("PUT")
 	//show log server address
 	log.Print("Server listen http://localhost:9000")
@@ -66,24 +66,4 @@ func updateUser(responseWriter http.ResponseWriter, request *http.Request) {
 		return
 	}
 	userToSave.Update(user.Id)
-}
-
-/*
-	Delete user by param id
-*/
-func deleteUser(responseWriter http.ResponseWriter, request *http.Request) {
-	params := mux.Vars(request)
-	id, err := strconv.Atoi(params["id"])
-	if err != nil {
-		log.Print(err.Error())
-		responseWriter.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	log.Printf("DELETE /api-v1/user/%v", id)
-	user := model.User{}.FindById(id)
-	if user == nil {
-		responseWriter.WriteHeader(http.StatusNotFound)
-		return
-	}
-	user.Remove()
 }

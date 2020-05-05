@@ -64,3 +64,23 @@ func CreateUser(responseWriter http.ResponseWriter, request *http.Request) {
 	responseWriter.Header().Set("location", fmt.Sprintf("/api-v1/user/%v", user.Id))
 	responseWriter.WriteHeader(http.StatusCreated)
 }
+
+/*
+	Delete user by param id
+*/
+func DeleteUser(responseWriter http.ResponseWriter, request *http.Request) {
+	params := mux.Vars(request)
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		log.Print(err.Error())
+		responseWriter.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	log.Printf("User controller: DELETE /api-v1/user/%v", id)
+	user := model.User{}.FindById(id)
+	if user == nil {
+		responseWriter.WriteHeader(http.StatusNotFound)
+		return
+	}
+	user.Remove()
+}
