@@ -12,13 +12,13 @@ type User struct {
 /*
 	Repository for users type
 */
-var UserRepo []User
+var userRepo []User
 
 /*
 	Initialize in memory database
 */
 func (_ User) InitializeDatabase() {
-	UserRepo = append(UserRepo,
+	userRepo = append(userRepo,
 		User{Id: 1, Name: "Jorge", Age: 20},
 		User{Id: 2, Name: "Jhon", Age: 33})
 }
@@ -27,14 +27,14 @@ func (_ User) InitializeDatabase() {
 	find all users in a repository
 */
 func (_ User) FindAll() []User {
-	return UserRepo
+	return userRepo
 }
 
 /*
 	find user by id
 */
 func (_ User) FindById(id int) *User {
-	for _, user := range UserRepo {
+	for _, user := range userRepo {
 		if user.Id == id {
 			return &user
 		}
@@ -46,19 +46,19 @@ func (_ User) FindById(id int) *User {
 	save new user in a repository
 */
 func (user *User) Save() {
-	user.Id = len(UserRepo) + 1
-	UserRepo = append(UserRepo, *user)
+	user.Id = len(userRepo) + 1
+	userRepo = append(userRepo, *user)
 }
 
 /*
 	delete user in a repository
 */
 func (user User) Remove() {
-	for key, u := range UserRepo {
+	for key, u := range userRepo {
 		if u.Id == user.Id {
-			leftSlice := UserRepo[0:key]
-			rightSlice := UserRepo[key+1:]
-			UserRepo = append(leftSlice, rightSlice...)
+			leftSlice := userRepo[0:key]
+			rightSlice := userRepo[key+1:]
+			userRepo = append(leftSlice, rightSlice...)
 			break
 		}
 	}
@@ -66,13 +66,13 @@ func (user User) Remove() {
 
 func (user *User) Update(id int) {
 	index := -1
-	for key, u := range UserRepo {
+	for key, u := range userRepo {
 		if u.Id == id {
 			index = key
 			break
 		}
 	}
-	u := &UserRepo[index]
+	u := &userRepo[index]
 	u.Id = id
 	u.Name = user.Name
 	u.Age = user.Age
