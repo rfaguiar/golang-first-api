@@ -21,7 +21,7 @@ func Run() {
 	router.HandleFunc("/", controller.Home).Methods("GET")
 	router.HandleFunc("/health", controller.HealthCheck).Methods("GET")
 	router.HandleFunc("/api-v1/user", controller.GetUsers).Methods("GET")
-	router.HandleFunc("/api-v1/user/{id}", getAnUser).Methods("GET")
+	router.HandleFunc("/api-v1/user/{id}", controller.GetAnUser).Methods("GET")
 	router.HandleFunc("/api-v1/user", createUser).Methods("POST")
 	router.HandleFunc("/api-v1/user/{id}", deleteUser).Methods("DELETE")
 	router.HandleFunc("/api-v1/user/{id}", updateUser).Methods("PUT")
@@ -104,28 +104,4 @@ func createUser(responseWriter http.ResponseWriter, request *http.Request) {
 	user.Save()
 	responseWriter.Header().Set("location", fmt.Sprintf("/api-v1/user/%v", user.Id))
 	responseWriter.WriteHeader(http.StatusCreated)
-}
-
-/*
-	show an user
-*/
-func getAnUser(responseWriter http.ResponseWriter, request *http.Request) {
-	params := mux.Vars(request)
-	id, err := strconv.Atoi(params["id"])
-	if err != nil {
-		log.Print(err.Error())
-		responseWriter.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	log.Printf("GET /api-v1/user/%v", id)
-	user := model.User{}.FindById(id)
-	if user == nil {
-		responseWriter.WriteHeader(http.StatusNotFound)
-		return
-	}
-	err = json.NewEncoder(responseWriter).Encode(user)
-	if err != nil {
-		log.Print(err.Error())
-		responseWriter.WriteHeader(http.StatusInternalServerError)
-	}
 }
