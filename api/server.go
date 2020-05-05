@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/rfaguiar/golang-first-api/api/controller"
 	"github.com/rfaguiar/golang-first-api/api/model"
 	"log"
 	"net/http"
@@ -17,7 +18,7 @@ func Run() {
 	model.User{}.InitializeDatabase()
 	router := mux.NewRouter()
 	router.Use(jsonMiddleware)
-	router.HandleFunc("/", home).Methods("GET")
+	router.HandleFunc("/", controller.Home).Methods("GET")
 	router.HandleFunc("/health", healthCheck).Methods("GET")
 	router.HandleFunc("/api-v1/user", getUsers).Methods("GET")
 	router.HandleFunc("/api-v1/user/{id}", getAnUser).Methods("GET")
@@ -156,18 +157,5 @@ func healthCheck(responseWriter http.ResponseWriter, _ *http.Request) {
 		log.Print(err.Error())
 		responseWriter.WriteHeader(http.StatusInternalServerError)
 		return
-	}
-}
-
-/*
-	show friendly message
-*/
-func home(responseWriter http.ResponseWriter, _ *http.Request) {
-	responseWriter.Header().Set("Content-Type", "text/plain")
-	log.Print("GET / home")
-	_, err := fmt.Fprint(responseWriter, "Server UP")
-	if err != nil { // if error then log error and return status code 500 Internal Server Error
-		log.Print(err.Error())
-		responseWriter.WriteHeader(http.StatusInternalServerError)
 	}
 }
