@@ -1,5 +1,10 @@
 package model
 
+import (
+	"github.com/rfaguiar/golang-first-api/database"
+	"log"
+)
+
 /*
 	User type for use CAD
 */
@@ -18,7 +23,24 @@ var userRepo = make([]User, 0)
 	find all users in a repository
 */
 func (_ User) FindAll() []User {
-	return userRepo
+	db := database.Current()
+	rows, err := db.Query("select id, name, age from person")
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+	defer rows.Close()
+	var result = make([]User, 0)
+	for rows.Next() {
+		var u User
+		if err := rows.Scan(&u.Id, &u.Name, &u.Age); err != nil {
+			log.Fatalf(err.Error())
+		}
+		result = append(result, u)
+	}
+	if err := rows.Err(); err != nil {
+		log.Fatalf(err.Error())
+	}
+	return result
 }
 
 /*

@@ -18,6 +18,10 @@ const (
 
 var db *sql.DB
 
+func Current() *sql.DB {
+	return db
+}
+
 func Open() *sql.DB {
 	fmt.Println("Connecting into postgress database")
 
