@@ -3,7 +3,6 @@ package api
 import (
 	"github.com/gorilla/mux"
 	"github.com/rfaguiar/golang-first-api/api/controller"
-	"github.com/rfaguiar/golang-first-api/api/model"
 	"log"
 	"net/http"
 )
@@ -12,7 +11,6 @@ import (
 	Startup server API
 */
 func Run() {
-	model.User{}.InitializeDatabase()
 	router := mux.NewRouter()
 	router.Use(jsonMiddleware)
 	router.HandleFunc("/", controller.Home).Methods("GET")

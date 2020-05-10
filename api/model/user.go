@@ -12,16 +12,7 @@ type User struct {
 /*
 	Repository for users type
 */
-var userRepo []User
-
-/*
-	Initialize in memory database
-*/
-func (_ User) InitializeDatabase() {
-	userRepo = append(userRepo,
-		User{Id: 1, Name: "Jorge", Age: 20},
-		User{Id: 2, Name: "Jhon", Age: 33})
-}
+var userRepo = make([]User, 0)
 
 /*
 	find all users in a repository
