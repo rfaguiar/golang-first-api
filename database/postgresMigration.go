@@ -8,45 +8,18 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/lib/pq"
 	"log"
-	"os"
-	"strconv"
+	"os/exec"
+	"runtime"
 )
 
-const (
-	host     = "host"
-	port     = "port"
-	user     = "user"
-	password = "password"
-	dbname   = "dbname"
-)
-
-func ExecuteMigration() {
-	fmt.Println("Connecting into postgress database")
-
-	dbInfo := getDbInfo()
-	portInfo, err := strconv.Atoi(dbInfo[port])
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
-		"password=%s dbname=%s sslmode=disable",
-		dbInfo[host], portInfo, dbInfo[user], dbInfo[password], dbInfo[dbname])
-	db, err := sql.Open("postgres", psqlInfo)
-	if err != nil {
-		log.Fatalf("could not connect database %v", err)
-	}
-	defer db.Close()
-
-	if err = db.Ping(); err != nil {
-		log.Fatalf("could not connect database %v", err)
-	}
-	fmt.Println("Successfully connected")
-
+func ExecuteMigration(db *sql.DB) {
 	// Run migrations
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
 		log.Fatalf("could not start sql migration... %v", err)
 	}
+
+	//executeCmd()
 
 	m, err := migrate.NewWithDatabaseInstance(
 		"file://./database/migrations",
@@ -60,41 +33,36 @@ func ExecuteMigration() {
 	}
 
 	log.Println("Database migrated")
-	// actual logic to start your application
-	os.Exit(0)
 }
 
-func getDbInfo() map[string]string {
-	result := make(map[string]string, 0)
-	envHost, ok := os.LookupEnv("ENV_DB_HOST")
-	if !ok {
-		log.Fatal("ENV_DB_HOST not found")
-	}
-	result[host] = envHost
+func executeCmd() {
+	if runtime.GOOS == "windows" {
+		fmt.Println("Can't Execute this on a windows machine")
+	} else {
+		// here we perform the pwd command.
+		// we can store the output of this in our out variable
+		// and catch any errors in err
+		out, err := exec.Command("ls").Output()
 
-	envPort, ok := os.LookupEnv("ENV_DB_PORT")
-	if !ok {
-		log.Fatal("ENV_DB_PORT not found")
-	}
-	result[port] = envPort
+		// if there is an error with our execution
+		// handle it here
+		if err != nil {
+			fmt.Printf("%s", err)
+		}
+		// as the out variable defined above is of type []byte we need to convert
+		// this to a string or else we will see garbage printed out in our console
+		// this is how we convert it to a string
+		fmt.Println("Command Successfully Executed")
+		output := string(out[:])
+		fmt.Println(output)
 
-	envUser, ok := os.LookupEnv("ENV_DB_USER")
-	if !ok {
-		log.Fatal("ENV_DB_USER not found")
+		// let's try the pwd command herer
+		out, err = exec.Command("ls").Output()
+		if err != nil {
+			fmt.Printf("%s", err)
+		}
+		fmt.Println("Command Successfully Executed")
+		output = string(out[:])
+		fmt.Println(output)
 	}
-	result[user] = envUser
-
-	envPass, ok := os.LookupEnv("ENV_DB_PASSWORD")
-	if !ok {
-		log.Fatal("ENV_DB_PASSWORD not found")
-	}
-	result[password] = envPass
-
-	envDbname, ok := os.LookupEnv("ENV_DB_DBNAME")
-	if !ok {
-		log.Fatal("ENV_DB_DBNAME not found")
-	}
-	result[dbname] = envDbname
-
-	return result
 }

@@ -35,6 +35,7 @@ WORKDIR /root/
 
 # Copy the Pre-built binary file from the previous stage
 COPY --from=builder /app/main .
+COPY --from=builder /app/database/migrations ./database/migrations
 
 # Expose port 9000 to the outside world
 EXPOSE 9000

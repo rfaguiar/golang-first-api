@@ -6,6 +6,8 @@ import (
 )
 
 func main() {
-	database.ExecuteMigration()
+	db := database.Open()
+	defer db.Close()
+	database.ExecuteMigration(db)
 	api.Run()
 }
