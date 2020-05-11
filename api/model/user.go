@@ -26,19 +26,19 @@ func (_ User) FindAll() []User {
 	db := database.Current()
 	rows, err := db.Query("select id, name, age from person")
 	if err != nil {
-		log.Fatalf(err.Error())
+		log.Print(err.Error())
 	}
 	defer rows.Close()
 	var result = make([]User, 0)
 	for rows.Next() {
 		var u User
 		if err := rows.Scan(&u.Id, &u.Name, &u.Age); err != nil {
-			log.Fatalf(err.Error())
+			log.Print(err.Error())
 		}
 		result = append(result, u)
 	}
 	if err := rows.Err(); err != nil {
-		log.Fatalf(err.Error())
+		log.Print(err.Error())
 	}
 	return result
 }
@@ -47,12 +47,14 @@ func (_ User) FindAll() []User {
 	find user by id
 */
 func (_ User) FindById(id int) *User {
-	for _, user := range userRepo {
-		if user.Id == id {
-			return &user
-		}
+	var u User
+	db := database.Current()
+	row := db.QueryRow("select id, name, age from person where id = $1", id)
+	if err := row.Scan(&u.Id, &u.Name, &u.Age); err != nil {
+		log.Print(err.Error())
+		return nil
 	}
-	return nil
+	return &u
 }
 
 /*
