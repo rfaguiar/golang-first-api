@@ -63,24 +63,17 @@ func (_ User) FindById(id int) *User {
 	save new user in a repository
 */
 func (user *User) Save() error {
-	errStr := fmt.Sprintf("Error when create user %v", user)
-	tx := getDbTrancation()
+	tx := getDbTransaction()
 	stmt, err := tx.Prepare("insert into person (name, age) values ($1, $2)")
 	if err != nil {
-		tx.Rollback()
-		log.Print(err.Error())
-		return fmt.Errorf(errStr)
+		return rollbackTransactionLogError(tx, err)
 	}
 	defer stmt.Close()
 	if _, err := stmt.Exec(user.Name, user.Age); err != nil {
-		tx.Rollback()
-		log.Print(err.Error())
-		return fmt.Errorf(errStr)
+		return rollbackTransactionLogError(tx, err)
 	}
 	if err := tx.Commit(); err != nil {
-		tx.Rollback()
-		log.Print(err.Error())
-		return fmt.Errorf(errStr)
+		return rollbackTransactionLogError(tx, err)
 	}
 	return nil
 }
@@ -89,24 +82,17 @@ func (user *User) Save() error {
 	delete user in a repository
 */
 func (user User) Remove() error {
-	errStr := fmt.Sprintf("Error when delete user %v", user)
-	tx := getDbTrancation()
+	tx := getDbTransaction()
 	stmt, err := tx.Prepare("delete from person where id = $1")
 	if err != nil {
-		tx.Rollback()
-		log.Print(err.Error())
-		return fmt.Errorf(errStr)
+		return rollbackTransactionLogError(tx, err)
 	}
 	defer stmt.Close()
 	if _, err := stmt.Exec(user.Id); err != nil {
-		tx.Rollback()
-		log.Print(err.Error())
-		return fmt.Errorf(errStr)
+		return rollbackTransactionLogError(tx, err)
 	}
 	if err := tx.Commit(); err != nil {
-		tx.Rollback()
-		log.Print(err.Error())
-		return fmt.Errorf(errStr)
+		return rollbackTransactionLogError(tx, err)
 	}
 	return nil
 }
@@ -115,29 +101,37 @@ func (user User) Remove() error {
 	update user in a repository
 */
 func (user *User) Update(id int) error {
-	errStr := fmt.Sprintf("Error when update user %v", user)
-	tx := getDbTrancation()
+	tx := getDbTransaction()
 	stmt, err := tx.Prepare("update person set name = $2, age = $3 where id = $1")
 	if err != nil {
-		tx.Rollback()
-		log.Print(err.Error())
-		return fmt.Errorf(errStr)
+		return rollbackTransactionLogError(tx, err)
 	}
 	defer stmt.Close()
 	if _, err := stmt.Exec(id, user.Name, user.Age); err != nil {
-		tx.Rollback()
-		log.Print(err.Error())
-		return fmt.Errorf(errStr)
+		return rollbackTransactionLogError(tx, err)
 	}
 	if err := tx.Commit(); err != nil {
-		tx.Rollback()
-		log.Print(err.Error())
-		return fmt.Errorf(errStr)
+		return rollbackTransactionLogError(tx, err)
 	}
 	return nil
 }
 
-func getDbTrancation() *sql.Tx {
+/*
+	Transaction rollback.
+	Log error.
+	Return transaction error formated
+*/
+func rollbackTransactionLogError(tx *sql.Tx, err error) error {
+	tx.Rollback()
+	log.Print(err.Error())
+	return fmt.Errorf("Error when execute transcation")
+}
+
+/*
+	Create database unique secure transaction
+	If error log in a console
+*/
+func getDbTransaction() *sql.Tx {
 	tx, err := database.Current().Begin()
 	if err != nil {
 		log.Print(err.Error())
