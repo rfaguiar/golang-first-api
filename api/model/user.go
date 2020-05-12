@@ -17,11 +17,6 @@ type User struct {
 }
 
 /*
-	Repository for users type
-*/
-var userRepo = make([]User, 0)
-
-/*
 	find all users in a repository
 */
 func (_ User) FindAll() []User {
