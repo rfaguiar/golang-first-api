@@ -119,16 +119,28 @@ func (user User) Remove() error {
 /*
 	update user in a repository
 */
-func (user *User) Update(id int) {
-	index := -1
-	for key, u := range userRepo {
-		if u.Id == id {
-			index = key
-			break
-		}
+func (user *User) Update(id int) error {
+	errStr := fmt.Sprintf("Error when update user %v", user)
+	tx, err := database.Current().Begin()
+	if err != nil {
+		log.Print(err.Error())
 	}
-	u := &userRepo[index]
-	u.Id = id
-	u.Name = user.Name
-	u.Age = user.Age
+	stmt, err := tx.Prepare("update person set name = $2, age = $3 where id = $1")
+	if err != nil {
+		tx.Rollback()
+		log.Print(err.Error())
+		return fmt.Errorf(errStr)
+	}
+	defer stmt.Close()
+	if _, err := stmt.Exec(id, user.Name, user.Age); err != nil {
+		tx.Rollback()
+		log.Print(err.Error())
+		return fmt.Errorf(errStr)
+	}
+	if err := tx.Commit(); err != nil {
+		tx.Rollback()
+		log.Print(err.Error())
+		return fmt.Errorf(errStr)
+	}
+	return nil
 }

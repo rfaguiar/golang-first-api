@@ -118,5 +118,9 @@ func UpdateUser(responseWriter http.ResponseWriter, request *http.Request) {
 		responseWriter.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	userToSave.Update(user.Id)
+	if err := userToSave.Update(user.Id); err != nil {
+		_, _ = fmt.Fprintf(responseWriter, "{error: %v}", err.Error())
+		responseWriter.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
