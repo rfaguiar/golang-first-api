@@ -62,6 +62,7 @@ func (_ User) FindById(id int) *User {
 	save new user in a repository
 */
 func (user *User) Save() error {
+	errStr := fmt.Sprintf("Error when create user %v", user)
 	tx, err := database.Current().Begin()
 	if err != nil {
 		log.Print(err.Error())
@@ -70,18 +71,18 @@ func (user *User) Save() error {
 	if err != nil {
 		tx.Rollback()
 		log.Print(err.Error())
-		return fmt.Errorf("Error create user %v", user)
+		return fmt.Errorf(errStr)
 	}
 	defer stmt.Close()
 	if _, err := stmt.Exec(user.Name, user.Age); err != nil {
 		tx.Rollback()
 		log.Print(err.Error())
-		return fmt.Errorf("Error create user %v", user)
+		return fmt.Errorf(errStr)
 	}
 	if err := tx.Commit(); err != nil {
 		tx.Rollback()
 		log.Print(err.Error())
-		return fmt.Errorf("Error create user %v", user)
+		return fmt.Errorf(errStr)
 	}
 	return nil
 }
@@ -89,17 +90,35 @@ func (user *User) Save() error {
 /*
 	delete user in a repository
 */
-func (user User) Remove() {
-	for key, u := range userRepo {
-		if u.Id == user.Id {
-			leftSlice := userRepo[0:key]
-			rightSlice := userRepo[key+1:]
-			userRepo = append(leftSlice, rightSlice...)
-			break
-		}
+func (user User) Remove() error {
+	errStr := fmt.Sprintf("Error when delete user %v", user)
+	tx, err := database.Current().Begin()
+	if err != nil {
+		log.Print(err.Error())
 	}
+	stmt, err := tx.Prepare("delete from person where id = $1")
+	if err != nil {
+		tx.Rollback()
+		log.Print(err.Error())
+		return fmt.Errorf(errStr)
+	}
+	defer stmt.Close()
+	if _, err := stmt.Exec(user.Id); err != nil {
+		tx.Rollback()
+		log.Print(err.Error())
+		return fmt.Errorf(errStr)
+	}
+	if err := tx.Commit(); err != nil {
+		tx.Rollback()
+		log.Print(err.Error())
+		return fmt.Errorf(errStr)
+	}
+	return nil
 }
 
+/*
+	update user in a repository
+*/
 func (user *User) Update(id int) {
 	index := -1
 	for key, u := range userRepo {
