@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"github.com/rfaguiar/golang-first-api/database"
 	"log"
 )
@@ -60,9 +61,29 @@ func (_ User) FindById(id int) *User {
 /*
 	save new user in a repository
 */
-func (user *User) Save() {
-	user.Id = len(userRepo) + 1
-	userRepo = append(userRepo, *user)
+func (user *User) Save() error {
+	tx, err := database.Current().Begin()
+	if err != nil {
+		log.Print(err.Error())
+	}
+	stmt, err := tx.Prepare("insert into person (name, age) values ($1, $2)")
+	if err != nil {
+		tx.Rollback()
+		log.Print(err.Error())
+		return fmt.Errorf("Error create user %v", user)
+	}
+	defer stmt.Close()
+	if _, err := stmt.Exec(user.Name, user.Age); err != nil {
+		tx.Rollback()
+		log.Print(err.Error())
+		return fmt.Errorf("Error create user %v", user)
+	}
+	if err := tx.Commit(); err != nil {
+		tx.Rollback()
+		log.Print(err.Error())
+		return fmt.Errorf("Error create user %v", user)
+	}
+	return nil
 }
 
 /*
