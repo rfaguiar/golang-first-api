@@ -1,6 +1,7 @@
 package model
 
 import (
+	"database/sql"
 	"fmt"
 	"github.com/rfaguiar/golang-first-api/database"
 	"log"
@@ -63,10 +64,7 @@ func (_ User) FindById(id int) *User {
 */
 func (user *User) Save() error {
 	errStr := fmt.Sprintf("Error when create user %v", user)
-	tx, err := database.Current().Begin()
-	if err != nil {
-		log.Print(err.Error())
-	}
+	tx := getDbTrancation()
 	stmt, err := tx.Prepare("insert into person (name, age) values ($1, $2)")
 	if err != nil {
 		tx.Rollback()
@@ -92,10 +90,7 @@ func (user *User) Save() error {
 */
 func (user User) Remove() error {
 	errStr := fmt.Sprintf("Error when delete user %v", user)
-	tx, err := database.Current().Begin()
-	if err != nil {
-		log.Print(err.Error())
-	}
+	tx := getDbTrancation()
 	stmt, err := tx.Prepare("delete from person where id = $1")
 	if err != nil {
 		tx.Rollback()
@@ -121,10 +116,7 @@ func (user User) Remove() error {
 */
 func (user *User) Update(id int) error {
 	errStr := fmt.Sprintf("Error when update user %v", user)
-	tx, err := database.Current().Begin()
-	if err != nil {
-		log.Print(err.Error())
-	}
+	tx := getDbTrancation()
 	stmt, err := tx.Prepare("update person set name = $2, age = $3 where id = $1")
 	if err != nil {
 		tx.Rollback()
@@ -143,4 +135,12 @@ func (user *User) Update(id int) error {
 		return fmt.Errorf(errStr)
 	}
 	return nil
+}
+
+func getDbTrancation() *sql.Tx {
+	tx, err := database.Current().Begin()
+	if err != nil {
+		log.Print(err.Error())
+	}
+	return tx
 }
