@@ -9,5 +9,6 @@ func main() {
 	db := database.Open()
 	defer db.Close()
 	database.ExecuteMigration(db)
-	api.Run()
+	server := api.Server{}
+	server.Run()
 }

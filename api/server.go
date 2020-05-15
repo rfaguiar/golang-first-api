@@ -7,23 +7,37 @@ import (
 	"net/http"
 )
 
+type Server struct {
+	Router *mux.Router
+}
+
 /*
 	Startup server API
 */
-func Run() {
-	router := mux.NewRouter()
-	router.Use(jsonMiddleware)
-	router.HandleFunc("/", controller.Home).Methods("GET")
-	router.HandleFunc("/health", controller.HealthCheck).Methods("GET")
-	router.HandleFunc("/api-v1/user", controller.GetUsers).Methods("GET")
-	router.HandleFunc("/api-v1/user/{id}", controller.GetAnUser).Methods("GET")
-	router.HandleFunc("/api-v1/user", controller.CreateUser).Methods("POST")
-	router.HandleFunc("/api-v1/user/{id}", controller.DeleteUser).Methods("DELETE")
-	router.HandleFunc("/api-v1/user/{id}", controller.UpdateUser).Methods("PUT")
-	//show log server address
-	log.Print("Server listen http://localhost:9000")
-	//UP server and listen http port 9000 using default http multiplexer, if error log message and kill api server
-	log.Fatal(http.ListenAndServe(":9000", router))
+func (s *Server) Run() {
+	s.Initialize()
+	log.Print("Server startup and listen http://localhost:9000")
+	log.Fatal(http.ListenAndServe(":9000", s.Router))
+}
+
+/*
+	Create new router and initialize http routes with controllers handlers
+*/
+func (s *Server) Initialize() {
+	s.Router = mux.NewRouter()
+	s.initializeRoutes()
+}
+
+func (s *Server) initializeRoutes() {
+	s.Router.Use(jsonMiddleware)
+	s.Router.HandleFunc("/", controller.Home).Methods("GET")
+	s.Router.HandleFunc("/health", controller.HealthCheck).Methods("GET")
+	s.Router.HandleFunc("/health", controller.HealthCheck).Methods("GET")
+	s.Router.HandleFunc("/api-v1/user", controller.GetUsers).Methods("GET")
+	s.Router.HandleFunc("/api-v1/user/{id}", controller.GetAnUser).Methods("GET")
+	s.Router.HandleFunc("/api-v1/user", controller.CreateUser).Methods("POST")
+	s.Router.HandleFunc("/api-v1/user/{id}", controller.DeleteUser).Methods("DELETE")
+	s.Router.HandleFunc("/api-v1/user/{id}", controller.UpdateUser).Methods("PUT")
 }
 
 /*
