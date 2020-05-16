@@ -19,11 +19,27 @@ func TestFindAllPerson(t *testing.T) {
 	//create users
 	db := database.Current()
 	tx, _ := db.Begin()
-	stmt, _ := tx.Prepare("INSERT INTO person(name, age) VALUES($1, $2)")
-	stmt.Exec("Jorge", 20)
-	stmt.Exec("Jhon", 33)
-	tx.Commit()
-	stmt.Close()
+	stmt, err := tx.Prepare("INSERT INTO person(name, age) VALUES($1, $2)")
+	if err != nil {
+		t.Error(err)
+	}
+	_, err = stmt.Exec("Jorge", 20)
+	if err != nil {
+		t.Error(err)
+	}
+	_, err = stmt.Exec("Jhon", 33)
+	if err != nil {
+		t.Error(err)
+	}
+	if err != nil {
+		t.Error(err)
+	}
+	if err := tx.Commit(); err != nil {
+		t.Error(err)
+	}
+	if err := stmt.Close(); err != nil {
+		t.Error(err)
+	}
 
 	//get /users
 	req, _ := http.NewRequest("GET", "/api-v1/user", nil)
@@ -36,8 +52,18 @@ func TestFindAllPerson(t *testing.T) {
 
 	//remove users
 	txr, _ := db.Begin()
-	stmts, _ := txr.Prepare("DELETE FROM person")
-	stmts.Exec()
-	txr.Commit()
-	stmts.Close()
+	stmts, err := txr.Prepare("DELETE FROM person")
+	if err != nil {
+		t.Error(err)
+	}
+	_, err = stmts.Exec()
+	if err != nil {
+		t.Error(err)
+	}
+	if err := txr.Commit(); err != nil {
+		t.Error(err)
+	}
+	if err := stmts.Close(); err != nil {
+		t.Error(err)
+	}
 }
