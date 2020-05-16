@@ -32,7 +32,6 @@ func (s *Server) initializeRoutes() {
 	s.Router.Use(jsonMiddleware)
 	s.Router.HandleFunc("/", controller.Home).Methods("GET")
 	s.Router.HandleFunc("/health", controller.HealthCheck).Methods("GET")
-	s.Router.HandleFunc("/health", controller.HealthCheck).Methods("GET")
 	s.Router.HandleFunc("/api-v1/user", controller.GetUsers).Methods("GET")
 	s.Router.HandleFunc("/api-v1/user/{id}", controller.GetAnUser).Methods("GET")
 	s.Router.HandleFunc("/api-v1/user", controller.CreateUser).Methods("POST")
