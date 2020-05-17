@@ -70,6 +70,10 @@ func (user *User) Save() error {
 	if err := tx.Commit(); err != nil {
 		return rollbackTransactionLogError(tx, err)
 	}
+	row := database.Current().QueryRow("select id from person where name = $1 and age = $2", user.Name, user.Age)
+	if err := row.Scan(&user.Id); err != nil {
+		log.Printf("Error when find user by name and age: %s", err.Error())
+	}
 	return nil
 }
 

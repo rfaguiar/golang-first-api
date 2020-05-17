@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/rfaguiar/golang-first-api/database"
 	"net/http"
+	"strings"
 	"testing"
 )
 
@@ -61,6 +62,30 @@ func TestFindAnIncorrectFormatPersonId(t *testing.T) {
 	if body := response.Body.String(); body != expected {
 		t.Errorf("Expected empty but. Got %s", body)
 	}
+}
+
+func TestCreatePerson(t *testing.T) {
+	//post /users
+	user := "{\"name\":\"Ana\",\"age\":23}\n"
+	response := executeRequest(t, "POST", "/api-v1/user", strings.NewReader(user))
+	checkResponseCode(t, http.StatusCreated, response.Code)
+	expected := ""
+	if body := response.Body.String(); body != expected {
+		t.Errorf("Expected empty but. Got %s", body)
+	}
+
+	var id int
+	db := database.Current()
+	row := db.QueryRow("select id from person where name = $1 and age = $2", "Ana", "23")
+	if err := row.Scan(&id); err != nil {
+		t.Errorf("Error when find user by name and age: %s", err.Error())
+	}
+
+	locationExp := fmt.Sprintf("/api-v1/user/%d", id)
+	if location := response.Header().Get("location"); location != locationExp {
+		t.Errorf("Expected location %s but. Got %s", locationExp, location)
+	}
+	removePerson()
 }
 
 func createPerson() []int {
