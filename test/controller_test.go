@@ -8,6 +8,7 @@ import (
 	"github.com/rfaguiar/golang-first-api/database"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
+	"io"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -87,9 +88,13 @@ func tearDown() {
 	container.Terminate(context.Background())
 }
 
-func executeRequest(req *http.Request) *httptest.ResponseRecorder {
+func executeRequest(t *testing.T, method, url string, body io.Reader) *httptest.ResponseRecorder {
+	request, err := http.NewRequest(method, url, body)
+	if err != nil {
+		t.Errorf("Error: %s\n when execute %s %s", method, url, err)
+	}
 	rr := httptest.NewRecorder()
-	server.Router.ServeHTTP(rr, req)
+	server.Router.ServeHTTP(rr, request)
 	return rr
 }
 func checkResponseCode(t *testing.T, expected, actual int) {
