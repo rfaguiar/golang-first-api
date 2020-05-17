@@ -88,6 +88,18 @@ func TestCreatePerson(t *testing.T) {
 	removePerson()
 }
 
+func TestCreateIncorrectPerson(t *testing.T) {
+	//post /users
+	user := "{\"name\":23,\"age\":\"Ana\"}\n"
+	response := postRequest(t, "/api-v1/user", strings.NewReader(user))
+	checkResponseCode(t, http.StatusInternalServerError, response.Code)
+	expected := ""
+	if body := response.Body.String(); body != expected {
+		t.Errorf("Expected empty but. Got %s", body)
+	}
+	removePerson()
+}
+
 func createPerson() []int {
 	db := database.Current()
 	result := make([]int, 0)
