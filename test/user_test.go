@@ -9,7 +9,7 @@ import (
 )
 
 func TestEmptyTablePerson(t *testing.T) {
-	response := executeRequest(t, "GET", "/api-v1/user", nil)
+	response := getRequest(t, "/api-v1/user")
 	checkResponseCode(t, http.StatusOK, response.Code)
 	if body := response.Body.String(); body != "[]\n" {
 		t.Errorf("Expected an empty array. Got %s", body)
@@ -20,7 +20,7 @@ func TestFindAllPerson(t *testing.T) {
 	createPerson()
 
 	//get /users
-	response := executeRequest(t, "GET", "/api-v1/user", nil)
+	response := getRequest(t, "/api-v1/user")
 	checkResponseCode(t, http.StatusOK, response.Code)
 	expected := "[{\"id\":1,\"name\":\"Jorge\",\"age\":20},{\"id\":2,\"name\":\"Jhon\",\"age\":33}]\n"
 	if body := response.Body.String(); body != expected {
@@ -34,7 +34,7 @@ func TestFindAnExistsPerson(t *testing.T) {
 	ids := createPerson()
 
 	//get /users/1
-	response := executeRequest(t, "GET", fmt.Sprintf("/api-v1/user/%d", ids[0]), nil)
+	response := getRequest(t, fmt.Sprintf("/api-v1/user/%d", ids[0]))
 	checkResponseCode(t, http.StatusOK, response.Code)
 	expected := fmt.Sprintf("{\"id\":%d,\"name\":\"Jorge\",\"age\":20}\n", ids[0])
 	if body := response.Body.String(); body != expected {
@@ -46,7 +46,7 @@ func TestFindAnExistsPerson(t *testing.T) {
 
 func TestFindAnNotExistsPerson(t *testing.T) {
 	//get /users/0
-	response := executeRequest(t, "GET", "/api-v1/user/0", nil)
+	response := getRequest(t, "/api-v1/user/0")
 	checkResponseCode(t, http.StatusNotFound, response.Code)
 	expected := ""
 	if body := response.Body.String(); body != expected {
@@ -56,7 +56,7 @@ func TestFindAnNotExistsPerson(t *testing.T) {
 
 func TestFindAnIncorrectFormatPersonId(t *testing.T) {
 	//get /users/0
-	response := executeRequest(t, "GET", "/api-v1/user/a", nil)
+	response := getRequest(t, "/api-v1/user/a")
 	checkResponseCode(t, http.StatusInternalServerError, response.Code)
 	expected := ""
 	if body := response.Body.String(); body != expected {
@@ -67,7 +67,7 @@ func TestFindAnIncorrectFormatPersonId(t *testing.T) {
 func TestCreatePerson(t *testing.T) {
 	//post /users
 	user := "{\"name\":\"Ana\",\"age\":23}\n"
-	response := executeRequest(t, "POST", "/api-v1/user", strings.NewReader(user))
+	response := postRequest(t, "/api-v1/user", strings.NewReader(user))
 	checkResponseCode(t, http.StatusCreated, response.Code)
 	expected := ""
 	if body := response.Body.String(); body != expected {

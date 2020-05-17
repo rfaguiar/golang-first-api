@@ -88,6 +88,14 @@ func tearDown() {
 	container.Terminate(context.Background())
 }
 
+func getRequest(t *testing.T, url string) *httptest.ResponseRecorder {
+	return executeRequest(t, http.MethodGet, url, nil)
+}
+
+func postRequest(t *testing.T, url string, body io.Reader) *httptest.ResponseRecorder {
+	return executeRequest(t, http.MethodPost, url, body)
+}
+
 func executeRequest(t *testing.T, method, url string, body io.Reader) *httptest.ResponseRecorder {
 	request, err := http.NewRequest(method, url, body)
 	if err != nil {
