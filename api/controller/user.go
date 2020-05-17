@@ -41,8 +41,7 @@ func GetAnUser(responseWriter http.ResponseWriter, request *http.Request) {
 		responseWriter.WriteHeader(http.StatusNotFound)
 		return
 	}
-	err = json.NewEncoder(responseWriter).Encode(user)
-	if err != nil {
+	if err = json.NewEncoder(responseWriter).Encode(user); err != nil {
 		log.Print(err.Error())
 		responseWriter.WriteHeader(http.StatusInternalServerError)
 	}

@@ -46,14 +46,25 @@ func TestFindAnExistsPerson(t *testing.T) {
 	removePerson()
 }
 
+func TestFindAnNotExistsPerson(t *testing.T) {
+	//get /users/0
+	req, _ := http.NewRequest("GET", "/api-v1/user/0", nil)
+	response := executeRequest(req)
+	checkResponseCode(t, http.StatusNotFound, response.Code)
+	expected := ""
+	if body := response.Body.String(); body != expected {
+		t.Errorf("Expected empty but. Got %s", body)
+	}
+}
+
 func createPerson() []int {
 	db := database.Current()
 	result := make([]int, 0)
-	var userid int
-	db.QueryRow("INSERT INTO person(name, age) VALUES($1, $2) RETURNING id", "Jorge", 20).Scan(&userid)
-	result = append(result, userid)
-	db.QueryRow("INSERT INTO person(name, age) VALUES($1, $2) RETURNING id", "Jhon", 33).Scan(&userid)
-	result = append(result, userid)
+	var personId int
+	db.QueryRow("INSERT INTO person(name, age) VALUES($1, $2) RETURNING id", "Jorge", 20).Scan(&personId)
+	result = append(result, personId)
+	db.QueryRow("INSERT INTO person(name, age) VALUES($1, $2) RETURNING id", "Jhon", 33).Scan(&personId)
+	result = append(result, personId)
 	return result
 }
 
