@@ -1,6 +1,7 @@
 package controller_test
 
 import (
+	"fmt"
 	"github.com/rfaguiar/golang-first-api/database"
 	"net/http"
 	"testing"
@@ -16,30 +17,7 @@ func TestEmptyTablePerson(t *testing.T) {
 }
 
 func TestFindAllPerson(t *testing.T) {
-	//create users
-	db := database.Current()
-	tx, _ := db.Begin()
-	stmt, err := tx.Prepare("INSERT INTO person(name, age) VALUES($1, $2)")
-	if err != nil {
-		t.Error(err)
-	}
-	_, err = stmt.Exec("Jorge", 20)
-	if err != nil {
-		t.Error(err)
-	}
-	_, err = stmt.Exec("Jhon", 33)
-	if err != nil {
-		t.Error(err)
-	}
-	if err != nil {
-		t.Error(err)
-	}
-	if err := tx.Commit(); err != nil {
-		t.Error(err)
-	}
-	if err := stmt.Close(); err != nil {
-		t.Error(err)
-	}
+	createPerson()
 
 	//get /users
 	req, _ := http.NewRequest("GET", "/api-v1/user", nil)
@@ -50,20 +28,40 @@ func TestFindAllPerson(t *testing.T) {
 		t.Errorf("Expected an users array. Got %s", body)
 	}
 
-	//remove users
+	removePerson()
+}
+
+func TestFindAnExistsPerson(t *testing.T) {
+	ids := createPerson()
+
+	//get /users/1
+	req, _ := http.NewRequest("GET", fmt.Sprintf("/api-v1/user/%d", ids[0]), nil)
+	response := executeRequest(req)
+	checkResponseCode(t, http.StatusOK, response.Code)
+	expected := fmt.Sprintf("{\"id\":%d,\"name\":\"Jorge\",\"age\":20}\n", ids[0])
+	if body := response.Body.String(); body != expected {
+		t.Errorf("Expected an user but. Got %s", body)
+	}
+
+	removePerson()
+}
+
+func createPerson() []int {
+	db := database.Current()
+	result := make([]int, 0)
+	var userid int
+	db.QueryRow("INSERT INTO person(name, age) VALUES($1, $2) RETURNING id", "Jorge", 20).Scan(&userid)
+	result = append(result, userid)
+	db.QueryRow("INSERT INTO person(name, age) VALUES($1, $2) RETURNING id", "Jhon", 33).Scan(&userid)
+	result = append(result, userid)
+	return result
+}
+
+func removePerson() {
+	db := database.Current()
 	txr, _ := db.Begin()
-	stmts, err := txr.Prepare("DELETE FROM person")
-	if err != nil {
-		t.Error(err)
-	}
-	_, err = stmts.Exec()
-	if err != nil {
-		t.Error(err)
-	}
-	if err := txr.Commit(); err != nil {
-		t.Error(err)
-	}
-	if err := stmts.Close(); err != nil {
-		t.Error(err)
-	}
+	stmts, _ := txr.Prepare("DELETE FROM person")
+	stmts.Exec()
+	txr.Commit()
+	stmts.Close()
 }
