@@ -86,8 +86,8 @@ func DeleteUser(responseWriter http.ResponseWriter, request *http.Request) {
 		return
 	}
 	if err := user.Remove(); err != nil {
-		_, _ = fmt.Fprintf(responseWriter, "{error: %v}", err.Error())
 		responseWriter.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(responseWriter, "{error: %v}", err.Error())
 		return
 	}
 }

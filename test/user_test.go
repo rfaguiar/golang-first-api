@@ -18,7 +18,7 @@ func TestEmptyTablePerson(t *testing.T) {
 
 func TestFindAllPerson(t *testing.T) {
 	createPerson()
-
+	defer removePerson()
 	//get /users
 	response := getRequest(t, "/api-v1/user")
 	checkResponseCode(t, http.StatusOK, response.Code)
@@ -26,13 +26,11 @@ func TestFindAllPerson(t *testing.T) {
 	if body := response.Body.String(); body != expected {
 		t.Errorf("Expected an users array. Got %s", body)
 	}
-
-	removePerson()
 }
 
 func TestFindAnExistsPerson(t *testing.T) {
 	ids := createPerson()
-
+	defer removePerson()
 	//get /users/1
 	response := getRequest(t, fmt.Sprintf("/api-v1/user/%d", ids[0]))
 	checkResponseCode(t, http.StatusOK, response.Code)
@@ -40,8 +38,6 @@ func TestFindAnExistsPerson(t *testing.T) {
 	if body := response.Body.String(); body != expected {
 		t.Errorf("Expected an user but. Got %s", body)
 	}
-
-	removePerson()
 }
 
 func TestFindAnNotExistsPerson(t *testing.T) {
@@ -66,6 +62,7 @@ func TestFindAnIncorrectFormatPersonId(t *testing.T) {
 
 func TestCreatePerson(t *testing.T) {
 	//post /users
+	defer removePerson()
 	user := "{\"name\":\"Ana\",\"age\":23}\n"
 	response := postRequest(t, "/api-v1/user", strings.NewReader(user))
 	checkResponseCode(t, http.StatusCreated, response.Code)
@@ -85,11 +82,11 @@ func TestCreatePerson(t *testing.T) {
 	if location := response.Header().Get("location"); location != locationExp {
 		t.Errorf("Expected location %s but. Got %s", locationExp, location)
 	}
-	removePerson()
 }
 
 func TestCreateIncorrectNamePerson(t *testing.T) {
 	//post /users
+	defer removePerson()
 	user := "{\"name\":23,\"age\":10}\n"
 	response := postRequest(t, "/api-v1/user", strings.NewReader(user))
 	checkResponseCode(t, http.StatusInternalServerError, response.Code)
@@ -97,11 +94,11 @@ func TestCreateIncorrectNamePerson(t *testing.T) {
 	if body := response.Body.String(); body != expected {
 		t.Errorf("Expected empty but. Got %s", body)
 	}
-	removePerson()
 }
 
 func TestCreateIncorrectAgePerson(t *testing.T) {
 	//post /users
+	defer removePerson()
 	user := "{\"name\":\"Dani\",\"age\":\"a\"}\n"
 	response := postRequest(t, "/api-v1/user", strings.NewReader(user))
 	checkResponseCode(t, http.StatusInternalServerError, response.Code)
@@ -109,17 +106,12 @@ func TestCreateIncorrectAgePerson(t *testing.T) {
 	if body := response.Body.String(); body != expected {
 		t.Errorf("Expected empty but. Got %s", body)
 	}
-	removePerson()
 }
 
 func TestCreatePersonWhenDbClosed(t *testing.T) {
 	//post /users
-	if err := database.Current().Ping(); err == nil {
-		if err := database.Current().Close(); err != nil {
-			t.Errorf("Error when close database %s", err)
-		}
-	}
-	database.Close()
+	closeDatabase(t)
+	defer openDatabase()
 	user := "{\"name\":\"Dani\",\"age\":11}\n"
 	response := postRequest(t, "/api-v1/user", strings.NewReader(user))
 	checkResponseCode(t, http.StatusInternalServerError, response.Code)
@@ -127,8 +119,36 @@ func TestCreatePersonWhenDbClosed(t *testing.T) {
 	if body := response.Body.String(); body != expected {
 		t.Errorf("Expected error but. Got %s", body)
 	}
-	if err := database.Current().Ping(); err != nil {
-		database.Open()
+}
+
+func TestDeletePerson(t *testing.T) {
+	ids := createPerson()
+	defer removePerson()
+	response := executeRequest(t, "DELETE", fmt.Sprintf("/api-v1/user/%d", ids[0]), nil)
+	checkResponseCode(t, http.StatusOK, response.Code)
+	expected := ""
+	if body := response.Body.String(); body != expected {
+		t.Errorf("Expected empty but. Got %s", body)
+	}
+}
+
+func TestDeletePersonWhenNotExistsId(t *testing.T) {
+	defer removePerson()
+	response := executeRequest(t, "DELETE", "/api-v1/user/0", nil)
+	checkResponseCode(t, http.StatusNotFound, response.Code)
+	expected := ""
+	if body := response.Body.String(); body != expected {
+		t.Errorf("Expected empty but. Got %s", body)
+	}
+}
+
+func TestDeletePersonWhenNotIncorrectId(t *testing.T) {
+	defer removePerson()
+	response := executeRequest(t, "DELETE", "/api-v1/user/a", nil)
+	checkResponseCode(t, http.StatusInternalServerError, response.Code)
+	expected := ""
+	if body := response.Body.String(); body != expected {
+		t.Errorf("Expected empty but. Got %s", body)
 	}
 }
 
@@ -150,4 +170,18 @@ func removePerson() {
 	stmts.Exec()
 	txr.Commit()
 	stmts.Close()
+}
+
+func openDatabase() {
+	if err := database.Current().Ping(); err != nil {
+		database.Open()
+	}
+}
+
+func closeDatabase(t *testing.T) {
+	if err := database.Current().Ping(); err == nil {
+		if err := database.Current().Close(); err != nil {
+			t.Errorf("Error when close database %s", err)
+		}
+	}
 }
