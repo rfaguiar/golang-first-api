@@ -96,6 +96,10 @@ func postRequest(t *testing.T, url string, body io.Reader) *httptest.ResponseRec
 	return executeRequest(t, http.MethodPost, url, body)
 }
 
+func deleteRequest(t *testing.T, url string) *httptest.ResponseRecorder {
+	return executeRequest(t, http.MethodDelete, url, nil)
+}
+
 func executeRequest(t *testing.T, method, url string, body io.Reader) *httptest.ResponseRecorder {
 	request, err := http.NewRequest(method, url, body)
 	if err != nil {

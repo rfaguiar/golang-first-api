@@ -124,7 +124,7 @@ func TestCreatePersonWhenDbClosed(t *testing.T) {
 func TestDeletePerson(t *testing.T) {
 	ids := createPerson()
 	defer removePerson()
-	response := executeRequest(t, "DELETE", fmt.Sprintf("/api-v1/user/%d", ids[0]), nil)
+	response := deleteRequest(t, fmt.Sprintf("/api-v1/user/%d", ids[0]))
 	checkResponseCode(t, http.StatusOK, response.Code)
 	expected := ""
 	if body := response.Body.String(); body != expected {
@@ -134,7 +134,7 @@ func TestDeletePerson(t *testing.T) {
 
 func TestDeletePersonWhenNotExistsId(t *testing.T) {
 	defer removePerson()
-	response := executeRequest(t, "DELETE", "/api-v1/user/0", nil)
+	response := deleteRequest(t, "/api-v1/user/0")
 	checkResponseCode(t, http.StatusNotFound, response.Code)
 	expected := ""
 	if body := response.Body.String(); body != expected {
@@ -144,7 +144,7 @@ func TestDeletePersonWhenNotExistsId(t *testing.T) {
 
 func TestDeletePersonWhenNotIncorrectId(t *testing.T) {
 	defer removePerson()
-	response := executeRequest(t, "DELETE", "/api-v1/user/a", nil)
+	response := deleteRequest(t, "/api-v1/user/a")
 	checkResponseCode(t, http.StatusInternalServerError, response.Code)
 	expected := ""
 	if body := response.Body.String(); body != expected {
