@@ -112,6 +112,26 @@ func TestCreateIncorrectAgePerson(t *testing.T) {
 	removePerson()
 }
 
+func TestCreatePersonWhenDbClosed(t *testing.T) {
+	//post /users
+	if err := database.Current().Ping(); err == nil {
+		if err := database.Current().Close(); err != nil {
+			t.Errorf("Error when close database %s", err)
+		}
+	}
+	database.Close()
+	user := "{\"name\":\"Dani\",\"age\":11}\n"
+	response := postRequest(t, "/api-v1/user", strings.NewReader(user))
+	checkResponseCode(t, http.StatusInternalServerError, response.Code)
+	expected := "{error: Error when execute transaction}"
+	if body := response.Body.String(); body != expected {
+		t.Errorf("Expected error but. Got %s", body)
+	}
+	if err := database.Current().Ping(); err != nil {
+		database.Open()
+	}
+}
+
 func createPerson() []int {
 	db := database.Current()
 	result := make([]int, 0)

@@ -60,8 +60,8 @@ func CreateUser(responseWriter http.ResponseWriter, request *http.Request) {
 		return
 	}
 	if err := user.Save(); err != nil {
-		_, _ = fmt.Fprintf(responseWriter, "{error: %v}", err.Error())
 		responseWriter.WriteHeader(http.StatusInternalServerError)
+		_, _ = fmt.Fprintf(responseWriter, "{error: %v}", err.Error())
 		return
 	}
 	responseWriter.Header().Set("location", fmt.Sprintf("/api-v1/user/%v", user.Id))
