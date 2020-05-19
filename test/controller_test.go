@@ -100,6 +100,10 @@ func deleteRequest(t *testing.T, url string) *httptest.ResponseRecorder {
 	return executeRequest(t, http.MethodDelete, url, nil)
 }
 
+func putRequest(t *testing.T, url string, body io.Reader) *httptest.ResponseRecorder {
+	return executeRequest(t, http.MethodPut, url, body)
+}
+
 func executeRequest(t *testing.T, method, url string, body io.Reader) *httptest.ResponseRecorder {
 	request, err := http.NewRequest(method, url, body)
 	if err != nil {

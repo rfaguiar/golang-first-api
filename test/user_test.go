@@ -152,6 +152,42 @@ func TestDeletePersonWhenNotIncorrectId(t *testing.T) {
 	}
 }
 
+func TestUpdatePerson(t *testing.T) {
+	ids := createPerson()
+	defer removePerson()
+	user := "{\"name\":\"Dani Silva\",\"age\":36}\n"
+	response := putRequest(t, fmt.Sprintf("/api-v1/user/%d", ids[0]), strings.NewReader(user))
+	checkResponseCode(t, http.StatusOK, response.Code)
+	expected := ""
+	if body := response.Body.String(); body != expected {
+		t.Errorf("Expected empty but. Got %s", body)
+	}
+}
+
+func TestUpdatePersonWhenNotExistsId(t *testing.T) {
+	ids := createPerson()
+	defer removePerson()
+	user := "{\"name\":\"Dani Silva\",\"age\":36}\n"
+	response := putRequest(t, fmt.Sprintf("/api-v1/user/%d", ids[0]-1), strings.NewReader(user))
+	checkResponseCode(t, http.StatusNotFound, response.Code)
+	expected := ""
+	if body := response.Body.String(); body != expected {
+		t.Errorf("Expected empty but. Got %s", body)
+	}
+}
+
+func TestUpdatePersonWhenNotIncorrectId(t *testing.T) {
+	createPerson()
+	defer removePerson()
+	user := "{\"name\":\"Dani Silva\",\"age\":36}\n"
+	response := putRequest(t, "/api-v1/user/a", strings.NewReader(user))
+	checkResponseCode(t, http.StatusInternalServerError, response.Code)
+	expected := ""
+	if body := response.Body.String(); body != expected {
+		t.Errorf("Expected empty but. Got %s", body)
+	}
+}
+
 func createPerson() []int {
 	db := database.Current()
 	result := make([]int, 0)
