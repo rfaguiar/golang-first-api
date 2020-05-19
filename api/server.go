@@ -30,13 +30,17 @@ func (s *Server) Initialize() {
 
 func (s *Server) initializeRoutes() {
 	s.Router.Use(jsonMiddleware)
-	s.Router.HandleFunc("/", controller.Home).Methods("GET")
-	s.Router.HandleFunc("/health", controller.HealthCheck).Methods("GET")
-	s.Router.HandleFunc("/api-v1/user", controller.GetUsers).Methods("GET")
-	s.Router.HandleFunc("/api-v1/user/{id}", controller.GetAnUser).Methods("GET")
+	s.get("/", controller.Home)
+	s.get("/health", controller.HealthCheck)
+	s.get("/api-v1/user", controller.GetUsers)
+	s.get("/api-v1/user/{id}", controller.GetAnUser)
 	s.Router.HandleFunc("/api-v1/user", controller.CreateUser).Methods("POST")
 	s.Router.HandleFunc("/api-v1/user/{id}", controller.DeleteUser).Methods("DELETE")
 	s.Router.HandleFunc("/api-v1/user/{id}", controller.UpdateUser).Methods("PUT")
+}
+
+func (s *Server) get(path string, f func(http.ResponseWriter, *http.Request)) {
+	s.Router.HandleFunc(path, f).Methods(http.MethodGet)
 }
 
 /*
