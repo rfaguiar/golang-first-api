@@ -5,5 +5,6 @@ package model
 	Ex: status: "UP"
 */
 type Health struct {
-	Status string `json:"status"`
+	Status   string `json:"status"`
+	Database string `json:"database"`
 }
