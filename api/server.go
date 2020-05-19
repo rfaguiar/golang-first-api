@@ -34,13 +34,25 @@ func (s *Server) initializeRoutes() {
 	s.get("/health", controller.HealthCheck)
 	s.get("/api-v1/user", controller.GetUsers)
 	s.get("/api-v1/user/{id}", controller.GetAnUser)
-	s.Router.HandleFunc("/api-v1/user", controller.CreateUser).Methods("POST")
-	s.Router.HandleFunc("/api-v1/user/{id}", controller.DeleteUser).Methods("DELETE")
-	s.Router.HandleFunc("/api-v1/user/{id}", controller.UpdateUser).Methods("PUT")
+	s.post("/api-v1/user", controller.CreateUser)
+	s.del("/api-v1/user/{id}", controller.DeleteUser)
+	s.put("/api-v1/user/{id}", controller.UpdateUser)
 }
 
 func (s *Server) get(path string, f func(http.ResponseWriter, *http.Request)) {
 	s.Router.HandleFunc(path, f).Methods(http.MethodGet)
+}
+
+func (s *Server) post(path string, f func(http.ResponseWriter, *http.Request)) {
+	s.Router.HandleFunc(path, f).Methods(http.MethodPost)
+}
+
+func (s *Server) del(path string, f func(http.ResponseWriter, *http.Request)) {
+	s.Router.HandleFunc(path, f).Methods(http.MethodDelete)
+}
+
+func (s *Server) put(path string, f func(http.ResponseWriter, *http.Request)) {
+	s.Router.HandleFunc(path, f).Methods(http.MethodPut)
 }
 
 /*
