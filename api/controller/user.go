@@ -97,9 +97,9 @@ func DeleteUser(responseWriter http.ResponseWriter, request *http.Request) {
 */
 func UpdateUser(responseWriter http.ResponseWriter, request *http.Request) {
 	params := mux.Vars(request)
-	id, err := strconv.Atoi(params["id"])
-	if err != nil {
-		log.Print(err.Error())
+	id, errConverter := strconv.Atoi(params["id"])
+	if errConverter != nil {
+		log.Print(errConverter.Error())
 		responseWriter.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -111,7 +111,7 @@ func UpdateUser(responseWriter http.ResponseWriter, request *http.Request) {
 		return
 	}
 	var userToSave model.User
-	err = json.NewDecoder(request.Body).Decode(&userToSave)
+	err := json.NewDecoder(request.Body).Decode(&userToSave)
 	if err != nil {
 		log.Print(err.Error())
 		responseWriter.WriteHeader(http.StatusInternalServerError)
