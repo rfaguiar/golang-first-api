@@ -34,7 +34,7 @@ jobs:
       run: go build -v .
 
     - name: Test
-      run: go test -v ./test/... -coverprofile=coverage.out
+      run: go test -v ./test/... -coverpkg=./...
 
     #https://github.com/marketplace/actions/docker-build-push
     - name: Docker build and push
